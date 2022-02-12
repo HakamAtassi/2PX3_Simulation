@@ -1,4 +1,8 @@
 import random
+from statistics import mode
+import matplotlib.pyplot as plt
+import numpy as np
+
 
 """
 2PX3 Intersection Simulation Starting Code 
@@ -338,6 +342,35 @@ class Simulation:
             + "]"
         )
 
+    def plot_results(self):
+        ##member that plots result of analysis with number of cars on x and time on y
+        x_values = []
+        y_values = []
+        for _ in range(1, 100):
+            model_data = Simulation(100)
+            model_data.upper_arrival_time = _  # change arrival time of model
+            model_data.run()
+            print(
+                "MEAN ARRIVAL=",
+                model_data.upper_arrival_time,
+                average(model_data.data),
+                "\n",
+            )
+            x_values.append(
+                model_data.upper_arrival_time
+            )  # _ is the mean arrival time / congestion
+            y_values.append(average(model_data.data))
+
+        plt.scatter(
+            x_values, y_values, label="Legacy Round Robin"
+        )  # generate and show graph
+        plt.xlabel("Upper arrival time")
+        plt.ylabel("Average clearance time")
+        plt.legend()
+        plt.xlim([0, 110])
+        plt.title("Clearance time VS Max arrival time")
+        plt.show()
+
     def generate_report(self):
         # Define a method to generate statistical results based on the time values stored in self.data
         # These could included but are not limited to: mean, variance, quartiles, etc.
@@ -345,4 +378,14 @@ class Simulation:
 
 
 def average(L):
+
     return sum(L) / len(L)
+
+
+if __name__ == "__main__":
+    sim = Simulation(10)
+    sim.run()
+    print("sim data:", average(sim.data))
+    sim.plot_results()
+
+    # plot_results()
