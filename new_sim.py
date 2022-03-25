@@ -1,0 +1,1 @@
+## this class will define the charactaristics of the
