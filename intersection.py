@@ -43,6 +43,8 @@ class Intersection:
     def initiate_timer(self):  # clock or time based counter. This will be used to measure performance.
         pass
 
+
+##Generates letters in place of vehicles. swap with vehicle objects.
     def generate_traffic(self):  # generate traffic for the intersection S
 
         if random.randint(0, 1) == 0:
