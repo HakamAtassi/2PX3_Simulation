@@ -119,6 +119,7 @@ class Intersection:
         time.sleep(4)
         print("Traffic light switched\n")
         self.alternate_traffic_light()
+        self.enable_traffic_lights()
 
 
 
@@ -151,8 +152,8 @@ class Intersection:
 
     def clear_intersection(self):
 
-            for j in range(14):
-                for m in range(14):
+            for j in range(15):
+                for m in range(15):
                     if(self.intersection_coordinates[j][m]=='A' or self.intersection_coordinates[j][m]=='H'):
                         self.intersection_coordinates[j][m] = ' '
 
@@ -177,7 +178,10 @@ class Intersection:
             for i in self.vehicles:
                 if (self.get_traffic_signal(i.direction) == 'g' or i.is_at_intersection()==False):
                     if(self.can_move(i)==True):
-                        i.take_step()
+                        try:
+                            i.take_step()
+                        except:
+                            self.vehicles.remove(i)
             self.clear_intersection()
             for i in self.vehicles:
                 self.intersection_coordinates[i.position_y][i.position_x] = i.type

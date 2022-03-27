@@ -22,14 +22,24 @@ class Vehicle:
 
     def take_step(self):
 
+
+
         if (self.direction == "Up"):
             self.position_y =self.position_y-1
+            if self.position_y < 0:
+                raise Exception
         elif (self.direction == "Down"):
             self.position_y =self.position_y+1
+            if self.position_y > 14:
+                raise Exception
         elif (self.direction == "Right"):
             self.position_x =self.position_x+1
+            if self.position_x > 14:
+                raise Exception
         elif (self.direction == "Left"):
             self.position_x =self.position_x-1
+            if self.position_x <0:
+                raise Exception
 
     def is_at_intersection(self):   #is the car at the traffic light?
         if (self.direction == "Up"):    ##important because cars should still take a step even if light is red
