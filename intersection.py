@@ -2,6 +2,7 @@ import random
 from vehicle import Vehicle
 import threading
 import time
+import matplotlib
 
 random.seed()
 
@@ -18,6 +19,7 @@ class Intersection:
     #   #dwn
 
     vehicles = []  # stores all the vehicles in traffic
+    collisions = 0
 
     intersection_coordinates = [['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
                                 ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
@@ -27,7 +29,7 @@ class Intersection:
                                 ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'r', 'x', 'x', 'x', 'x'],
                                 [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
                                 [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-                                # dir =>
+
                                 [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
                                 ['x', 'x', 'x', 'x', 'r', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
                                 ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'r', 'x', 'x', 'x', 'x', 'x'],
@@ -48,6 +50,26 @@ class Intersection:
     def initiate_timer(self):  # clock or time based counter. This will be used to measure performance.
         pass
 
+    def generate_traffic_autonomous(self):  ##a function that only generates self driving cars in "priority lanes
+        new_vehicle = Vehicle()
+        spawn_chance = random.uniform(0, 1).__round__(2)  # generates random double from 0 to 1
+        if spawn_chance >= 0.5:  # this spawn chance depends on time of day. controls congestion
+            ##spawn vehicle
+            spawn_location = random.randint(0, 1)  # randomizes where the vehicle will spawn
+
+            if spawn_location == 0:
+                new_vehicle.type = 'A'
+                self.intersection_coordinates[0][7] = new_vehicle.type
+                new_vehicle.set_position(7, 0)
+                new_vehicle.set_direction("Down")
+
+            if spawn_location == 5:
+                new_vehicle.type = 'A'
+                self.intersection_coordinates[7][0] = new_vehicle.type
+                new_vehicle.set_position(0, 7)
+                new_vehicle.set_direction("Right")
+        self.vehicles.append(new_vehicle)
+
     ##Generates letters in place of vehicles. swap with vehicle objects.
     def generate_traffic(self):  # generate traffic for the intersection S
         new_vehicle = Vehicle()
@@ -55,7 +77,7 @@ class Intersection:
         if spawn_chance >= 0.5:  # this spawn chance depends on time of day. controls congestion
             ##spawn vehicle
 
-            spawn_location = random.randint(0, 3)  # randomizes where the vehicle will spawn
+            spawn_location = random.randint(0, 5)  # randomizes where the vehicle will spawn
             if spawn_location == 0:
                 self.intersection_coordinates[0][6] = new_vehicle.type
                 new_vehicle.set_position(6, 0)
@@ -74,12 +96,25 @@ class Intersection:
                 self.intersection_coordinates[8][0] = new_vehicle.type
                 new_vehicle.set_position(0, 8)
                 new_vehicle.set_direction("Right")
+
+            if spawn_location == 4:
+                new_vehicle.type = 'A'
+                self.intersection_coordinates[0][7] = new_vehicle.type
+                new_vehicle.set_position(7, 0)
+                new_vehicle.set_direction("Down")
+
+            if spawn_location == 5:
+                new_vehicle.type = 'A'
+                self.intersection_coordinates[7][0] = new_vehicle.type
+                new_vehicle.set_position(0, 7)
+                new_vehicle.set_direction("Right")
         self.vehicles.append(new_vehicle)
 
     def is_empty(self):  ##returns true if there are no cars on the intersection
         for i in range(15):
             for j in range(15):
-                if (self.intersection_coordinates[i][j] == 'A' or self.intersection_coordinates[i][j] == 'H'):  ##if an A or H exists in the matrix, its not empty
+                if (self.intersection_coordinates[i][j] == 'A' or self.intersection_coordinates[i][
+                    j] == 'H'):  ##if an A or H exists in the matrix, its not empty
                     return False
         return True
 
@@ -90,52 +125,72 @@ class Intersection:
         self.intersection_coordinates[10][9] = 'r'
 
     def alternate_traffic_light(self):
-        if(self.intersection_coordinates[4][5] =='g'):
+        if (self.intersection_coordinates[4][5] == 'g'):
             self.intersection_coordinates[4][5] = 'r'
             self.intersection_coordinates[5][10] = 'g'
 
-        elif(self.intersection_coordinates[5][10] == 'g'):
+        elif (self.intersection_coordinates[5][10] == 'g'):
             self.intersection_coordinates[5][10] = 'r'
             self.intersection_coordinates[10][9] = 'g'
 
 
-        elif(self.intersection_coordinates[10][9] == 'g'):
+        elif (self.intersection_coordinates[10][9] == 'g'):
             self.intersection_coordinates[10][9] = 'r'
             self.intersection_coordinates[9][4] = 'g'
 
-        elif(self.intersection_coordinates[9][4] == 'g'):
+        elif (self.intersection_coordinates[9][4] == 'g'):
             self.intersection_coordinates[9][4] = 'r'
-            self.intersection_coordinates[4][5] ='g'
+            self.intersection_coordinates[4][5] = 'g'
 
         else:
             self.intersection_coordinates[9][4] = 'g'
+
+    def priority_lane_cleared_r(self):  ##check if the "right" priority lane is empty
+        counter = 0
+        for i in range(6):
+            if self.intersection_coordinates[7][i] != ' ':
+                counter += 1
+        if counter == 0:
+            return True
+        else:
+            return False
+
+    def priority_lane_cleared_l(self):
+        counter = 0
+        for i in range(6):
+            if self.intersection_coordinates[i][7] != ' ':
+                counter += 1
+        if counter == 0:
+            return True
+        else:
+            return False
 
     def enable_traffic_lights(self):  # turns on the timed feature of traffic lights
         # if there are no cars and a self-driving car pulls up, let it pass.
         # else, acts on a timer like normal traffic light
 
-        #if (self.is_empty() == True):
-        time.sleep(0.05) ##dont search matrix too often. too energy consuming
-        #self.set_lights_red(self.intersection_coordinates)
+        # if (self.is_empty() == True):
+
+        time.sleep(0.05)  ##dont search matrix too often. too energy consuming
+
+        if self.intersection_coordinates[9][4] == 'g':
+            while(self.priority_lane_cleared_r() == False):
+                time.sleep(0.2)
+            print("Traffic light switched\n")
+            self.alternate_traffic_light()
+
+
+        if self.intersection_coordinates[4][5] == 'g':
+            while(self.priority_lane_cleared_l() == False):
+                time.sleep(0.2)
+            print("Traffic light switched\n")
+            self.alternate_traffic_light()
+
         time.sleep(4)
         print("Traffic light switched\n")
         self.alternate_traffic_light()
         self.enable_traffic_lights()
 
-
-
-        ## why do we not let human driven cars pass even if its empty?
-        ##becuase if the light turns green for a hd car and the car decides to not clear, accidents may occur.
-
-        ##if intersection is clear, turn everything red.
-        ## car is generated
-        ##pulls up to intersection when empty
-        ##self driven?
-        ##yes =>make green so car does not stop
-        ##no=>wait as normal.
-        ##not empty?
-        ##use normal timed lights.
-        ## what about the self drinving lane? do lights apply to it?
         pass
 
     def progress_intersection(self):  ##this function takes the next step based on the logic we defined.
@@ -151,34 +206,31 @@ class Intersection:
         if direction == "Left":
             return self.intersection_coordinates[5][10]
 
-    def clear_intersection(self):
+    def clear_intersection(self):  ##is the whole intersection empty?
 
-            for j in range(15):
-                for m in range(15):
-                    if(self.intersection_coordinates[j][m]=='A' or self.intersection_coordinates[j][m]=='H'):
-                        self.intersection_coordinates[j][m] = ' '
+        for j in range(15):
+            for m in range(15):
+                if (self.intersection_coordinates[j][m] == 'A' or self.intersection_coordinates[j][m] == 'H'):
+                    self.intersection_coordinates[j][m] = ' '
 
-
-
-    def vehicle_ahead(self,_vehicle):
-        if(self.intersection_coordinates[_vehicle.front_position()[0]][_vehicle.front_position()[1]])!=' ':
+    def vehicle_ahead(self, _vehicle):
+        if (self.intersection_coordinates[_vehicle.front_position()[0]][_vehicle.front_position()[1]]) != ' ':
             return True
         return False
 
-    def can_move(self,curr_vehicle):
+    def can_move(self, curr_vehicle):
         """Vehicles enter list based on FIFO. earliest elements move first. if there are no elements in the list that
         occupy the desired location, the next vehicle can move"""
         for i in self.vehicles:
-            if(curr_vehicle.front_position()==i.current_position()):
+            if (curr_vehicle.front_position() == i.current_position()):
                 return False
         return True
-
 
     def take_step(self):
         try:
             for i in self.vehicles:
-                if (self.get_traffic_signal(i.direction) == 'g' or i.is_at_intersection()==False):
-                    if(self.can_move(i)==True):
+                if (self.get_traffic_signal(i.direction) == 'g' or i.is_at_intersection() == False):
+                    if (self.can_move(i) == True):
                         try:
                             i.take_step()
                         except:
@@ -194,9 +246,17 @@ class Intersection:
         ##might be good to talk about during presentation.
         pass
 
+    def count_collisions(self):  # broken
+        ##pretty sure the elements that left the intersection are not being removed from the list
+
+        for i in self.vehicles:
+            for j in self.vehicles:
+                if i.current_position() == j.current_position() and i != j:
+                    self.collisions = self.collisions + 1
+        print("collisions: ", self.collisions)
+
 
 if __name__ == "__main__":
-
 
     a = Intersection()
     t1 = threading.Thread(target=a.enable_traffic_lights, args=())
@@ -204,9 +264,12 @@ if __name__ == "__main__":
     a.print_intersection()
     t1.start()
     for i in range(1000):
+        print("right prio empty: ", a.priority_lane_cleared_r())
         a.generate_traffic()
+        # a.generate_traffic_autonomous()
         a.print_intersection()
-        time.sleep(0.3)
+        time.sleep(0.5)
+        # a.count_collisions()
         a.take_step()
 
     t1.join()
