@@ -92,20 +92,21 @@ class Intersection:
     def alternate_traffic_light(self):
         if(self.intersection_coordinates[4][5] =='g'):
             self.intersection_coordinates[4][5] = 'r'
-            self.intersection_coordinates[5][10] == 'g'
+            self.intersection_coordinates[5][10] = 'g'
 
         elif(self.intersection_coordinates[5][10] == 'g'):
-            self.intersection_coordinates[5][10] == 'r'
-            self.intersection_coordinates[10][9] == 'g'
+            self.intersection_coordinates[5][10] = 'r'
+            self.intersection_coordinates[10][9] = 'g'
 
+
+        elif(self.intersection_coordinates[10][9] == 'g'):
+            self.intersection_coordinates[10][9] = 'r'
+            self.intersection_coordinates[9][4] = 'g'
 
         elif(self.intersection_coordinates[9][4] == 'g'):
             self.intersection_coordinates[9][4] = 'r'
             self.intersection_coordinates[4][5] ='g'
 
-        elif(self.intersection_coordinates[10][9] == 'g'):
-            self.intersection_coordinates[10][9] == 'r'
-            self.intersection_coordinates[9][4] = 'g'
         else:
             self.intersection_coordinates[9][4] = 'g'
 
