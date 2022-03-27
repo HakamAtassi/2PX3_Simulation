@@ -7,6 +7,7 @@ class Vehicle:
         self.direction = None
         self.position_x = None
         self.position_y = None
+        self.time_in_intersection=0
 
         if random.randint(0, 1) == 0:  # 50/50 chance of either type being generated
             self.type = 'A'

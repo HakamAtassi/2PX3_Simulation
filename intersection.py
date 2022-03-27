@@ -2,11 +2,12 @@ import random
 from vehicle import Vehicle
 import threading
 import time
-import matplotlib
-
+import matplotlib.pyplot as plt
+import numpy as np
 random.seed()
 
 congestion_index = 0.5  # controls congestion/spawn rate
+
 
 
 class Intersection:
@@ -19,7 +20,8 @@ class Intersection:
     #   #dwn
 
     vehicles = []  # stores all the vehicles in traffic
-    collisions = 0
+    
+    time_in_intersection_data=[]
 
     intersection_coordinates = [['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
                                 ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
@@ -38,6 +40,9 @@ class Intersection:
                                 ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
                                 ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
                                 ]  #
+
+    def __init__(self):
+        self.collisions = None
 
     def print_intersection(self):
         for i in range(len(self.intersection_coordinates)):  ##just prints the matrix
@@ -173,18 +178,22 @@ class Intersection:
 
         time.sleep(0.05)  ##dont search matrix too often. too energy consuming
 
-        if self.intersection_coordinates[9][4] == 'g':
-            while(self.priority_lane_cleared_r() == False):
-                time.sleep(0.2)
-            print("Traffic light switched\n")
-            self.alternate_traffic_light()
+
+        """
+                if self.intersection_coordinates[9][4] == 'g':
+        while(self.priority_lane_cleared_r() == False):
+            time.sleep(0.2)
+        print("Traffic light switched\n")
+        self.alternate_traffic_light()
 
 
-        if self.intersection_coordinates[4][5] == 'g':
-            while(self.priority_lane_cleared_l() == False):
-                time.sleep(0.2)
-            print("Traffic light switched\n")
-            self.alternate_traffic_light()
+    if self.intersection_coordinates[4][5] == 'g':
+        while(self.priority_lane_cleared_l() == False):
+            time.sleep(0.2)
+        print("Traffic light switched\n")
+        self.alternate_traffic_light()
+        """
+
 
         time.sleep(4)
         print("Traffic light switched\n")
@@ -230,16 +239,39 @@ class Intersection:
         try:
             for i in self.vehicles:
                 if (self.get_traffic_signal(i.direction) == 'g' or i.is_at_intersection() == False):
+
                     if (self.can_move(i) == True):
                         try:
                             i.take_step()
                         except:
                             self.vehicles.remove(i)
             self.clear_intersection()
+
             for i in self.vehicles:
                 self.intersection_coordinates[i.position_y][i.position_x] = i.type
         except:
             self.vehicles.pop()
+        for i in self.vehicles:
+            i.time_in_intersection+=1   ##increment number of steps
+
+
+
+
+
+    def print_vehicles(self):
+        y=[]
+        x=[]
+        for i in range(len(self.vehicles)):
+            print(self.vehicles[i].time_in_intersection)
+            y.append(self.vehicles[i].time_in_intersection)
+            x.append(i)
+
+
+        a = np.array(x)
+        b = np.array(y)
+
+        plt.scatter(a, b)
+        plt.show()
 
     def most_congeseted(self):
         ## a function that returns which lane direciton is most congested. just implement but we decided we arent going to actually use it
@@ -247,12 +279,10 @@ class Intersection:
         pass
 
     def count_collisions(self):  # broken
-        ##pretty sure the elements that left the intersection are not being removed from the list
-
         for i in self.vehicles:
             for j in self.vehicles:
                 if i.current_position() == j.current_position() and i != j:
-                    self.collisions = self.collisions + 1
+                    self.collisions=self.collisions+1
         print("collisions: ", self.collisions)
 
 
@@ -263,14 +293,15 @@ if __name__ == "__main__":
 
     a.print_intersection()
     t1.start()
-    for i in range(1000):
+    for i in range(100):
         print("right prio empty: ", a.priority_lane_cleared_r())
         a.generate_traffic()
         # a.generate_traffic_autonomous()
         a.print_intersection()
         time.sleep(0.5)
-        # a.count_collisions()
+        a.count_collisions()
         a.take_step()
+    a.print_vehicles()
 
     t1.join()
 
@@ -282,3 +313,4 @@ if __name__ == "__main__":
     a.enable_traffic_lights()
     a.print_intersection()
   """
+
