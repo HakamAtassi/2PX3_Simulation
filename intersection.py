@@ -1,6 +1,7 @@
 import random
 from vehicle import Vehicle
 import time
+
 random.seed()
 
 congestion_index = 0.5  # controls congestion/spawn rate
@@ -15,8 +16,7 @@ class Intersection:
     ##on right for each lane
     #   #dwn
 
-    vehicles=[] #stores all the vehicles in traffic
-
+    vehicles = []  # stores all the vehicles in traffic
 
     intersection_coordinates = [['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
                                 ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
@@ -37,7 +37,7 @@ class Intersection:
                                 ]  #
 
     def print_intersection(self):
-        for i in range(len(self.intersection_coordinates)): ##just prints the matrix
+        for i in range(len(self.intersection_coordinates)):  ##just prints the matrix
 
             for j in range(len(self.intersection_coordinates[0])):
                 print(self.intersection_coordinates[i][j], end=' ')
@@ -58,15 +58,15 @@ class Intersection:
             if spawn_location == 0:
                 self.intersection_coordinates[0][6] = new_vehicle.type
                 new_vehicle.set_position(6, 0)
-                new_vehicle.set_direction("Down")   ##sets direction of vehicle object
+                new_vehicle.set_direction("Down")  ##sets direction of vehicle object
 
             if spawn_location == 1:
                 self.intersection_coordinates[6][14] = new_vehicle.type
                 new_vehicle.set_position(14, 6)
                 new_vehicle.set_direction("Left")
             if spawn_location == 2:
-                self.intersection_coordinates[14][6] = new_vehicle.type
-                new_vehicle.set_position(6, 14)
+                self.intersection_coordinates[14][8] = new_vehicle.type
+                new_vehicle.set_position(8, 14)
                 new_vehicle.set_direction("Up")
 
             if spawn_location == 3:
@@ -75,11 +75,11 @@ class Intersection:
                 new_vehicle.set_direction("Right")
         self.vehicles.append(new_vehicle)
 
-
     def is_empty(self):  ##returns true if there are no cars on the intersection
         for i in range(15):
             for j in range(15):
-                if (self.intersection_coordinates[i][j] == 'A' or self.intersection_coordinates[i][j] == 'H'):  ##if an A or H exists in the matrix, its not empty
+                if (self.intersection_coordinates[i][j] == 'A' or self.intersection_coordinates[i][
+                    j] == 'H'):  ##if an A or H exists in the matrix, its not empty
                     return False
         return True
 
@@ -113,35 +113,62 @@ class Intersection:
     def progress_intersection(self):  ##this function takes the next step based on the logic we defined.
         pass
 
+    def get_traffic_signal(self, direction):
+        if direction == "Up":
+            return self.intersection_coordinates[10][9]
+        if direction == "Down":
+            return self.intersection_coordinates[4][5]
+        if direction == "Right":
+            return self.intersection_coordinates[9][4]
+        if direction == "Left":
+            return self.intersection_coordinates[5][10]
 
     def clear_intersection(self):
         self.intersection_coordinates = [['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
-                                    ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
-                                    ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
-                                    ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
-                                    ['x', 'x', 'x', 'x', 'x', 'r', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
-                                    ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'r', 'x', 'x', 'x', 'x'],
-                                    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-                                    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-                                    # dir =>
-                                    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-                                    ['x', 'x', 'x', 'x', 'r', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
-                                    ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'r', 'x', 'x', 'x', 'x', 'x'],
-                                    ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
-                                    ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
-                                    ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
-                                    ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
-                                    ]  #
+                                         ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
+                                         ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
+                                         ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
+                                         ['x', 'x', 'x', 'x', 'x', 'r', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
+                                         ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'r', 'x', 'x', 'x', 'x'],
+                                         [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+                                         [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+                                         [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+                                         ['x', 'x', 'x', 'x', 'r', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
+                                         ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'r', 'x', 'x', 'x', 'x', 'x'],
+                                         ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
+                                         ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
+                                         ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
+                                         ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
+                                         ]  #
+
+    def vehicle_ahead(self,_vehicle):
+        if(self.intersection_coordinates[_vehicle.front_position()[0]][_vehicle.front_position()[1]])!=' ':
+            return True
+        return False
+
+    def can_move(self,curr_vehicle):
+        """Vehicles enter list based on FIFO. earliest elements move first. if there are no elements in the list that
+        occupy the desired location, the next vehicle can move"""
+        for i in self.vehicles:
+            if(curr_vehicle.front_position()==i.current_position()):
+                return False
+        return True
+
+
 
     def take_step(self):
-        for i in self.vehicles:
-            print(i.position_x,i.position_y)
-            self.clear_intersection()
-            i.take_step()
-            print(i.position_x, i.position_y)
 
-        for i in self.vehicles:
-            self.intersection_coordinates[i.position_y][i.position_x]=i.type
+        try:
+            for i in self.vehicles:
+                if (self.get_traffic_signal(i.direction) == 'g' or i.is_at_intersection()==False):
+                    if(self.can_move(i)==True):
+                        i.take_step()
+            self.clear_intersection()
+            for i in self.vehicles:
+                self.intersection_coordinates[i.position_y][i.position_x] = i.type
+        except:
+            self.vehicles.pop()
+
 
 
     def most_congeseted(self):
@@ -154,10 +181,12 @@ if __name__ == "__main__":
     a = Intersection()
     a.generate_traffic()
     a.print_intersection()
-    for i in range(14):
-        time.sleep(0.6)
+    for i in range(1000):
+        time.sleep(0.3)
         a.take_step()
         a.print_intersection()
+        a.generate_traffic()
+
     """
     a = Intersection()
     a.generate_traffic()
@@ -166,6 +195,3 @@ if __name__ == "__main__":
     a.enable_traffic_lights()
     a.print_intersection()
   """
-
-
-
