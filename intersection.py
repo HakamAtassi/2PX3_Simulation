@@ -1,6 +1,6 @@
 import random
 from vehicle import Vehicle
-
+import time
 random.seed()
 
 congestion_index = 0.5  # controls congestion/spawn rate
@@ -14,6 +14,9 @@ class Intersection:
     ##r and g indicate the color of the traffic light
     ##on right for each lane
     #   #dwn
+
+    vehicles=[] #stores all the vehicles in traffic
+
 
     intersection_coordinates = [['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
                                 ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
@@ -34,7 +37,7 @@ class Intersection:
                                 ]  #
 
     def print_intersection(self):
-        for i in range(len(self.intersection_coordinates)):
+        for i in range(len(self.intersection_coordinates)): ##just prints the matrix
 
             for j in range(len(self.intersection_coordinates[0])):
                 print(self.intersection_coordinates[i][j], end=' ')
@@ -55,26 +58,28 @@ class Intersection:
             if spawn_location == 0:
                 self.intersection_coordinates[0][6] = new_vehicle.type
                 new_vehicle.set_position(6, 0)
-                new_vehicle.set_direction("Down")
+                new_vehicle.set_direction("Down")   ##sets direction of vehicle object
 
             if spawn_location == 1:
                 self.intersection_coordinates[6][14] = new_vehicle.type
-                new_vehicle.set_position(14, 0)
+                new_vehicle.set_position(14, 6)
                 new_vehicle.set_direction("Left")
             if spawn_location == 2:
                 self.intersection_coordinates[14][6] = new_vehicle.type
-                new_vehicle.set_position(0, 14)
+                new_vehicle.set_position(6, 14)
                 new_vehicle.set_direction("Up")
 
             if spawn_location == 3:
                 self.intersection_coordinates[8][0] = new_vehicle.type
                 new_vehicle.set_position(0, 8)
                 new_vehicle.set_direction("Right")
+        self.vehicles.append(new_vehicle)
+
 
     def is_empty(self):  ##returns true if there are no cars on the intersection
         for i in range(15):
             for j in range(15):
-                if (self.intersection_coordinates[i][j] == 'A' or self.intersection_coordinates[i][j] == 'H'):
+                if (self.intersection_coordinates[i][j] == 'A' or self.intersection_coordinates[i][j] == 'H'):  ##if an A or H exists in the matrix, its not empty
                     return False
         return True
 
@@ -108,6 +113,37 @@ class Intersection:
     def progress_intersection(self):  ##this function takes the next step based on the logic we defined.
         pass
 
+
+    def clear_intersection(self):
+        self.intersection_coordinates = [['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
+                                    ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
+                                    ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
+                                    ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
+                                    ['x', 'x', 'x', 'x', 'x', 'r', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
+                                    ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'r', 'x', 'x', 'x', 'x'],
+                                    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+                                    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+                                    # dir =>
+                                    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+                                    ['x', 'x', 'x', 'x', 'r', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
+                                    ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'r', 'x', 'x', 'x', 'x', 'x'],
+                                    ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
+                                    ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
+                                    ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
+                                    ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
+                                    ]  #
+
+    def take_step(self):
+        for i in self.vehicles:
+            print(i.position_x,i.position_y)
+            self.clear_intersection()
+            i.take_step()
+            print(i.position_x, i.position_y)
+
+        for i in self.vehicles:
+            self.intersection_coordinates[i.position_y][i.position_x]=i.type
+
+
     def most_congeseted(self):
         ## a function that returns which lane direciton is most congested. just implement but we decided we arent going to actually use it
         ##might be good to talk about during presentation.
@@ -118,6 +154,18 @@ if __name__ == "__main__":
     a = Intersection()
     a.generate_traffic()
     a.print_intersection()
+    for i in range(14):
+        time.sleep(0.6)
+        a.take_step()
+        a.print_intersection()
+    """
+    a = Intersection()
+    a.generate_traffic()
+    a.print_intersection()
     print(a.is_empty())
     a.enable_traffic_lights()
     a.print_intersection()
+  """
+
+
+
