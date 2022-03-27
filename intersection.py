@@ -1,5 +1,6 @@
 import random
 from vehicle import Vehicle
+import threading
 import time
 
 random.seed()
@@ -78,8 +79,7 @@ class Intersection:
     def is_empty(self):  ##returns true if there are no cars on the intersection
         for i in range(15):
             for j in range(15):
-                if (self.intersection_coordinates[i][j] == 'A' or self.intersection_coordinates[i][
-                    j] == 'H'):  ##if an A or H exists in the matrix, its not empty
+                if (self.intersection_coordinates[i][j] == 'A' or self.intersection_coordinates[i][j] == 'H'):  ##if an A or H exists in the matrix, its not empty
                     return False
         return True
 
@@ -89,12 +89,38 @@ class Intersection:
         self.intersection_coordinates[9][4] = 'r'
         self.intersection_coordinates[10][9] = 'r'
 
+    def alternate_traffic_light(self):
+        if(self.intersection_coordinates[4][5] =='g'):
+            self.intersection_coordinates[4][5] = 'r'
+            self.intersection_coordinates[5][10] == 'g'
+
+        elif(self.intersection_coordinates[5][10] == 'g'):
+            self.intersection_coordinates[5][10] == 'r'
+            self.intersection_coordinates[10][9] == 'g'
+
+
+        elif(self.intersection_coordinates[9][4] == 'g'):
+            self.intersection_coordinates[9][4] = 'r'
+            self.intersection_coordinates[4][5] ='g'
+
+        elif(self.intersection_coordinates[10][9] == 'g'):
+            self.intersection_coordinates[10][9] == 'r'
+            self.intersection_coordinates[9][4] = 'g'
+        else:
+            self.intersection_coordinates[9][4] = 'g'
+
     def enable_traffic_lights(self):  # turns on the timed feature of traffic lights
-        # if there are no cars and a self driving car pulls up, let it pass.
+        # if there are no cars and a self-driving car pulls up, let it pass.
         # else, acts on a timer like normal traffic light
 
-        if (self.is_empty() == True):
-            self.set_lights_red(self.intersection_coordinates)
+        #if (self.is_empty() == True):
+        time.sleep(0.05) ##dont search matrix too often. too energy consuming
+        #self.set_lights_red(self.intersection_coordinates)
+        time.sleep(4)
+        print("Traffic light switched\n")
+        self.alternate_traffic_light()
+
+
 
         ## why do we not let human driven cars pass even if its empty?
         ##becuase if the light turns green for a hd car and the car decides to not clear, accidents may occur.
@@ -124,22 +150,13 @@ class Intersection:
             return self.intersection_coordinates[5][10]
 
     def clear_intersection(self):
-        self.intersection_coordinates = [['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
-                                         ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
-                                         ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
-                                         ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
-                                         ['x', 'x', 'x', 'x', 'x', 'r', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
-                                         ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'r', 'x', 'x', 'x', 'x'],
-                                         [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-                                         [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-                                         [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-                                         ['x', 'x', 'x', 'x', 'r', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
-                                         ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'r', 'x', 'x', 'x', 'x', 'x'],
-                                         ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
-                                         ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
-                                         ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
-                                         ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
-                                         ]  #
+
+            for j in range(14):
+                for m in range(14):
+                    if(self.intersection_coordinates[j][m]=='A' or self.intersection_coordinates[j][m]=='H'):
+                        self.intersection_coordinates[j][m] = ' '
+
+
 
     def vehicle_ahead(self,_vehicle):
         if(self.intersection_coordinates[_vehicle.front_position()[0]][_vehicle.front_position()[1]])!=' ':
@@ -155,9 +172,7 @@ class Intersection:
         return True
 
 
-
     def take_step(self):
-
         try:
             for i in self.vehicles:
                 if (self.get_traffic_signal(i.direction) == 'g' or i.is_at_intersection()==False):
@@ -169,8 +184,6 @@ class Intersection:
         except:
             self.vehicles.pop()
 
-
-
     def most_congeseted(self):
         ## a function that returns which lane direciton is most congested. just implement but we decided we arent going to actually use it
         ##might be good to talk about during presentation.
@@ -178,14 +191,20 @@ class Intersection:
 
 
 if __name__ == "__main__":
+
+
     a = Intersection()
-    a.generate_traffic()
+    t1 = threading.Thread(target=a.enable_traffic_lights, args=())
+
     a.print_intersection()
+    t1.start()
     for i in range(1000):
+        a.generate_traffic()
+        a.print_intersection()
         time.sleep(0.3)
         a.take_step()
-        a.print_intersection()
-        a.generate_traffic()
+
+    t1.join()
 
     """
     a = Intersection()
