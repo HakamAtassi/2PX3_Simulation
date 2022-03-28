@@ -8,7 +8,12 @@ random.seed()
 
 congestion_index = 0.5  # controls congestion/spawn rate
 
-
+class Colours:
+    R = '\033[91m'
+    G = '\033[92m'
+    END = '\033[0m'
+    SD = '\033[96m'
+    HD = '\033[93m'
 
 class Intersection:
     ##the intersection will be preresented by a square matrix
@@ -48,7 +53,16 @@ class Intersection:
         for i in range(len(self.intersection_coordinates)):  ##just prints the matrix
 
             for j in range(len(self.intersection_coordinates[0])):
-                print(self.intersection_coordinates[i][j], end=' ')
+                if 'r' in self.intersection_coordinates[i][j]:
+                    print(Colours.R + self.intersection_coordinates[i][j] + Colours.END, end=' ')
+                elif 'g' in self.intersection_coordinates[i][j]:
+                    print(Colours.G + self.intersection_coordinates[i][j] + Colours.END, end=' ')
+                elif "A" in self.intersection_coordinates[i][j]:
+                    print(Colours.SD + self.intersection_coordinates[i][j] + Colours.END, end=' ')
+                elif "H" in self.intersection_coordinates[i][j]:
+                    print(Colours.HD + self.intersection_coordinates[i][j] + Colours.END, end=' ')
+                else:
+                    print(self.intersection_coordinates[i][j], end=' ')
             print("\t")
         print("\n<><><><><><><><><><><><><><><>\n")
 
