@@ -7,6 +7,8 @@ class Vehicle:
         self.direction = None
         self.position_x = None
         self.position_y = None
+
+        self.in_intersection_square=False
         self.time_in_intersection=0
 
         if random.randint(0, 1) == 0:  # 50/50 chance of either type being generated
@@ -59,9 +61,32 @@ class Vehicle:
 
 
 
+
     def current_position(self): ##helper function for can move
                                 ##same format as front position for easy comparision
             return self.position_y,self.position_x
+
+
+
+    def in_square(self):
+
+
+        if self.current_position() == (6, 6) or self.current_position() == (7, 6) or self.current_position() == (8, 6):
+            self.in_intersection_square=True
+            return True
+        elif self.current_position() == (6, 7) or self.current_position() == (7, 7) or self.current_position() == (8, 7):
+            self.in_intersection_square=True
+            return True
+        elif self.current_position() == (6, 8) or self.current_position() == (7, 8) or self.current_position() == (8, 8):
+            self.in_intersection_square=True
+            return True
+
+        else:
+            self.in_intersection_square=False
+            return False
+
+
+
 
     def front_position(self):
         if (self.direction == "Up"):

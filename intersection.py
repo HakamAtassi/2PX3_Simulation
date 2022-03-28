@@ -4,10 +4,11 @@ import threading
 import time
 import matplotlib.pyplot as plt
 import numpy as np
+import math
+import numpy
 random.seed()
 
 congestion_index = 0.5  # controls congestion/spawn rate
-
 
 
 class Intersection:
@@ -20,8 +21,8 @@ class Intersection:
     #   #dwn
 
     vehicles = []  # stores all the vehicles in traffic
-    
-    time_in_intersection_data=[]
+
+    time_in_intersection_data = []
 
     intersection_coordinates = [['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
                                 ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
@@ -31,7 +32,6 @@ class Intersection:
                                 ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'r', 'x', 'x', 'x', 'x'],
                                 [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
                                 [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-
                                 [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
                                 ['x', 'x', 'x', 'x', 'r', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
                                 ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'r', 'x', 'x', 'x', 'x', 'x'],
@@ -42,7 +42,7 @@ class Intersection:
                                 ]  #
 
     def __init__(self):
-        self.collisions = None
+        self.collisions = 0
 
     def print_intersection(self):
         for i in range(len(self.intersection_coordinates)):  ##just prints the matrix
@@ -52,8 +52,7 @@ class Intersection:
             print("\t")
         print("\n<><><><><><><><><><><><><><><>\n")
 
-    def initiate_timer(self):  # clock or time based counter. This will be used to measure performance.
-        pass
+
 
     def generate_traffic_autonomous(self):  ##a function that only generates self driving cars in "priority lanes
         new_vehicle = Vehicle()
@@ -177,24 +176,19 @@ class Intersection:
         # if (self.is_empty() == True):
 
         time.sleep(0.05)  ##dont search matrix too often. too energy consuming
-
-
         """
-                if self.intersection_coordinates[9][4] == 'g':
-        while(self.priority_lane_cleared_r() == False):
-            time.sleep(0.2)
-        print("Traffic light switched\n")
-        self.alternate_traffic_light()
+        if self.intersection_coordinates[9][4] == 'g':
+            while (self.priority_lane_cleared_r() == False):
+                time.sleep(0.2)
+            print("Traffic light switched\n")
+            self.alternate_traffic_light()
 
-
-    if self.intersection_coordinates[4][5] == 'g':
-        while(self.priority_lane_cleared_l() == False):
-            time.sleep(0.2)
-        print("Traffic light switched\n")
-        self.alternate_traffic_light()
-        """
-
-
+        if self.intersection_coordinates[4][5] == 'g':
+            while (self.priority_lane_cleared_l() == False):
+                time.sleep(0.2)
+            print("Traffic light switched\n")
+            self.alternate_traffic_light()
+            """
         time.sleep(4)
         print("Traffic light switched\n")
         self.alternate_traffic_light()
@@ -216,7 +210,6 @@ class Intersection:
             return self.intersection_coordinates[5][10]
 
     def clear_intersection(self):  ##is the whole intersection empty?
-
         for j in range(15):
             for m in range(15):
                 if (self.intersection_coordinates[j][m] == 'A' or self.intersection_coordinates[j][m] == 'H'):
@@ -231,9 +224,32 @@ class Intersection:
         """Vehicles enter list based on FIFO. earliest elements move first. if there are no elements in the list that
         occupy the desired location, the next vehicle can move"""
         for i in self.vehicles:
-            if (curr_vehicle.front_position() == i.current_position()):
+            if (
+                    curr_vehicle.front_position() == i.current_position() and i.in_square == False):  ##if there is a vehicle in front and its not in "square
+                return False  ##then it cant collide
+        return True  ##can collide
+
+    def square_empty(self):  ##are there any cars in the intersection "square"
+        for j in range(3):
+            if (self.intersection_coordinates[6][6 + j]) != ' ':
+                return False
+            if (self.intersection_coordinates[7][6 + j]) != ' ':
+                return False
+            if (self.intersection_coordinates[8][6 + j]) != ' ':
                 return False
         return True
+
+
+    def in_square_test(self):
+        insquare=0
+        for i in self.vehicles:
+            #print(i.in_square())
+            if i.in_square()==True:
+                insquare+=1
+
+        #print("insquare",insquare)
+
+
 
     def take_step(self):
         try:
@@ -252,21 +268,15 @@ class Intersection:
         except:
             self.vehicles.pop()
         for i in self.vehicles:
-            i.time_in_intersection+=1   ##increment number of steps
-
-
-
-
+            i.time_in_intersection += 1  ##increment number of steps
 
     def print_vehicles(self):
-        y=[]
-        x=[]
+        y = []
+        x = []
         for i in range(len(self.vehicles)):
             print(self.vehicles[i].time_in_intersection)
             y.append(self.vehicles[i].time_in_intersection)
             x.append(i)
-
-
         a = np.array(x)
         b = np.array(y)
 
@@ -278,11 +288,23 @@ class Intersection:
         ##might be good to talk about during presentation.
         pass
 
-    def count_collisions(self):  # broken
+
+    def count_insquare(self):
+        insquare=0
         for i in self.vehicles:
-            for j in self.vehicles:
-                if i.current_position() == j.current_position() and i != j:
-                    self.collisions=self.collisions+1
+            if i.in_square()==True:
+                insquare+=1
+        return insquare
+
+    def count_collisions(self):
+        collision_chance=random.uniform(0, 1).__round__(2)  # generates random double from 0 to 1
+        insquare=0
+        print(self.count_insquare())
+        if(collision_chance>1/(numpy.log(self.count_insquare()+1))): #        if(collision_chance>1/numpy.log(insquare+1)):
+            self.collisions+=1
+
+
+
         print("collisions: ", self.collisions)
 
 
@@ -296,9 +318,11 @@ if __name__ == "__main__":
     for i in range(100):
         print("right prio empty: ", a.priority_lane_cleared_r())
         a.generate_traffic()
+        #sa.in_square_test()
         # a.generate_traffic_autonomous()
         a.print_intersection()
         time.sleep(0.5)
+
         a.count_collisions()
         a.take_step()
     a.print_vehicles()
@@ -313,4 +337,3 @@ if __name__ == "__main__":
     a.enable_traffic_lights()
     a.print_intersection()
   """
-
