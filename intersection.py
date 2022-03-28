@@ -11,6 +11,13 @@ random.seed()
 congestion_index = 0.5  # controls congestion/spawn rate
 
 
+class Colours:
+    R = '\033[91m'
+    G = '\033[92m'
+    END = '\033[0m'
+    SD = '\033[96m'
+    HD = '\033[93m'
+
 class Intersection:
     ##the intersection will be preresented by a square matrix
     ##vehicles will be denoted by an 'A' for autonomous, 'H' for human. Road is denoted by a space " " char. undrivable road is denoted by an "x".
@@ -48,9 +55,20 @@ class Intersection:
         for i in range(len(self.intersection_coordinates)):  ##just prints the matrix
 
             for j in range(len(self.intersection_coordinates[0])):
-                print(self.intersection_coordinates[i][j], end=' ')
+                if 'r' in self.intersection_coordinates[i][j]:
+                    print(Colours.R + self.intersection_coordinates[i][j] + Colours.END, end=' ')
+                elif 'g' in self.intersection_coordinates[i][j]:
+                    print(Colours.G + self.intersection_coordinates[i][j] + Colours.END, end=' ')
+                elif "A" in self.intersection_coordinates[i][j]:
+                    print(Colours.SD + self.intersection_coordinates[i][j] + Colours.END, end=' ')
+                elif "H" in self.intersection_coordinates[i][j]:
+                    print(Colours.HD + self.intersection_coordinates[i][j] + Colours.END, end=' ')
+                else:
+                    print(self.intersection_coordinates[i][j], end=' ')
             print("\t")
         print("\n<><><><><><><><><><><><><><><>\n")
+
+
 
 
 
@@ -299,7 +317,7 @@ class Intersection:
     def count_collisions(self):
         collision_chance=random.uniform(0, 1).__round__(2)  # generates random double from 0 to 1
         insquare=0
-        print(self.count_insquare())
+        #print(self.count_insquare())
         if(collision_chance>1/(numpy.log(self.count_insquare()+1))): #        if(collision_chance>1/numpy.log(insquare+1)):
             self.collisions+=1
 
@@ -316,7 +334,7 @@ if __name__ == "__main__":
     a.print_intersection()
     t1.start()
     for i in range(100):
-        print("right prio empty: ", a.priority_lane_cleared_r())
+        #print("right prio empty: ", a.priority_lane_cleared_r())
         a.generate_traffic()
         #sa.in_square_test()
         # a.generate_traffic_autonomous()
