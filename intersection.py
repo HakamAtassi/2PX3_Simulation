@@ -2,10 +2,11 @@ import random
 from vehicle import Vehicle
 import threading
 import time
+import numpy as np
+import matplotlib.pyplot as plt
 
 random.seed()
 
-congestion_index = 0.5  # controls congestion/spawn rate
 
 class Colours:
     R = '\033[91m'
@@ -23,6 +24,10 @@ class Intersection:
     ##on right for each lane
     #   #dwn
 
+    def __init__(self):
+        self.collisions = 0
+
+
     vehicles = []  # stores all the vehicles in traffic
 
     intersection_coordinates = [['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
@@ -33,7 +38,6 @@ class Intersection:
                                 ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'r', 'x', 'x', 'x', 'x'],
                                 [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
                                 [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-                                # dir =>
                                 [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
                                 ['x', 'x', 'x', 'x', 'r', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
                                 ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'r', 'x', 'x', 'x', 'x', 'x'],
@@ -41,7 +45,7 @@ class Intersection:
                                 ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
                                 ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
                                 ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
-                                ]  #
+                                ] 
 
     def print_intersection(self):
         for i in range(len(self.intersection_coordinates)):  ##just prints the matrix
@@ -60,8 +64,25 @@ class Intersection:
             print("\t")
         print("\n<><><><><><><><><><><><><><><>\n")
 
-    def initiate_timer(self):  # clock or time based counter. This will be used to measure performance.
-        pass
+    def generate_traffic_autonomous(self):  ##a function that only generates self driving cars in "priority lanes
+        new_vehicle = Vehicle()
+        spawn_chance = random.uniform(0, 1).__round__(2)  # generates random double from 0 to 1
+        if spawn_chance >= 0.5:  # this spawn chance depends on time of day. controls congestion
+            ##spawn vehicle
+            spawn_location = random.randint(0, 1)  # randomizes where the vehicle will spawn
+
+            if spawn_location == 0:
+                new_vehicle.type = 'A'
+                self.intersection_coordinates[0][7] = new_vehicle.type
+                new_vehicle.set_position(7, 0)
+                new_vehicle.set_direction("Down")
+
+            if spawn_location == 5:
+                new_vehicle.type = 'A'
+                self.intersection_coordinates[7][0] = new_vehicle.type
+                new_vehicle.set_position(0, 7)
+                new_vehicle.set_direction("Right")
+        self.vehicles.append(new_vehicle)
 
     ##Generates letters in place of vehicles. swap with vehicle objects.
     def generate_traffic(self):  # generate traffic for the intersection S
@@ -70,7 +91,7 @@ class Intersection:
         if spawn_chance >= 0.5:  # this spawn chance depends on time of day. controls congestion
             ##spawn vehicle
 
-            spawn_location = random.randint(0, 3)  # randomizes where the vehicle will spawn
+            spawn_location = random.randint(0, 5)  # randomizes where the vehicle will spawn
             if spawn_location == 0:
                 self.intersection_coordinates[0][6] = new_vehicle.type
                 new_vehicle.set_position(6, 0)
@@ -88,6 +109,18 @@ class Intersection:
             if spawn_location == 3:
                 self.intersection_coordinates[8][0] = new_vehicle.type
                 new_vehicle.set_position(0, 8)
+                new_vehicle.set_direction("Right")
+
+            if spawn_location == 4:
+                new_vehicle.type = 'A'
+                self.intersection_coordinates[0][7] = new_vehicle.type
+                new_vehicle.set_position(7, 0)
+                new_vehicle.set_direction("Down")
+
+            if spawn_location == 5:
+                new_vehicle.type = 'A'
+                self.intersection_coordinates[7][0] = new_vehicle.type
+                new_vehicle.set_position(0, 7)
                 new_vehicle.set_direction("Right")
         self.vehicles.append(new_vehicle)
 
@@ -137,20 +170,6 @@ class Intersection:
         self.alternate_traffic_light()
         self.enable_traffic_lights()
 
-
-
-        ## why do we not let human driven cars pass even if its empty?
-        ##becuase if the light turns green for a hd car and the car decides to not clear, accidents may occur.
-
-        ##if intersection is clear, turn everything red.
-        ## car is generated
-        ##pulls up to intersection when empty
-        ##self driven?
-        ##yes =>make green so car does not stop
-        ##no=>wait as normal.
-        ##not empty?
-        ##use normal timed lights.
-        ## what about the self drinving lane? do lights apply to it?
         pass
 
     def progress_intersection(self):  ##this function takes the next step based on the logic we defined.
@@ -188,6 +207,27 @@ class Intersection:
                 return False
         return True
 
+    def count_insquare(self):
+        insquare=0
+        for i in self.vehicles:
+            if i.in_square()==True:
+                insquare+=1
+        return insquare
+
+    def count_collisions(self):
+        collision_chance=random.uniform(0, 1).__round__(2)  # generates random double from 0 to 1
+        insquare=0
+        #print(self.count_insquare())
+
+        if(self.count_insquare()>0):
+            if(collision_chance>1/(np.log(self.count_insquare()+1))): #        if(collision_chance>1/numpy.log(insquare+1)):
+                self.collisions+=1
+
+
+
+
+        print("collisions: ", self.collisions)
+
 
     def take_step(self):
         try:
@@ -203,11 +243,27 @@ class Intersection:
                 self.intersection_coordinates[i.position_y][i.position_x] = i.type
         except:
             self.vehicles.pop()
+        for i in self.vehicles:
+            i.time_in_intersection += 1  ##increment number of steps
 
     def most_congeseted(self):
         ## a function that returns which lane direciton is most congested. just implement but we decided we arent going to actually use it
         ##might be good to talk about during presentation.
         pass
+
+    def create_graph(self):
+        y = []
+        x = []
+        for i in range(len(self.vehicles)):
+            print(self.vehicles[i].time_in_intersection)
+            y.append(self.vehicles[i].time_in_intersection)
+            x.append(i)
+        a = np.array(x)
+        b = np.array(y)
+
+        plt.scatter(a, b)
+        plt.show()
+
 
 
 if __name__ == "__main__":
@@ -218,13 +274,15 @@ if __name__ == "__main__":
 
     a.print_intersection()
     t1.start()
-    for i in range(1000):
+    for i in range(100):
         a.generate_traffic()
         a.print_intersection()
         time.sleep(0.3)
         a.take_step()
-
-    t1.join()
+        a.count_collisions()
+    a.create_graph()
+    t1.join()   #joins the traffic light thread to the main program.
+    a.create_graph()
 
     """
     a = Intersection()
