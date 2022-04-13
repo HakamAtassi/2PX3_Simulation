@@ -26,6 +26,7 @@ class Intersection:
 
     def __init__(self):
         self.collisions = 0
+        self.time_to_exit=[]
 
 
     vehicles = []  # stores all the vehicles in traffic
@@ -45,7 +46,7 @@ class Intersection:
                                 ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
                                 ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
                                 ['x', 'x', 'x', 'x', 'x', 'x', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'x', 'x'],
-                                ] 
+                                ]
 
     def print_intersection(self):
         for i in range(len(self.intersection_coordinates)):  ##just prints the matrix
@@ -122,6 +123,8 @@ class Intersection:
                 self.intersection_coordinates[7][0] = new_vehicle.type
                 new_vehicle.set_position(0, 7)
                 new_vehicle.set_direction("Right")
+
+
         self.vehicles.append(new_vehicle)
 
     def is_empty(self):  ##returns true if there are no cars on the intersection
@@ -243,8 +246,14 @@ class Intersection:
                 self.intersection_coordinates[i.position_y][i.position_x] = i.type
         except:
             self.vehicles.pop()
+
         for i in self.vehicles:
             i.time_in_intersection += 1  ##increment number of steps
+            print("curr position:", i.current_position())
+            if(self.at_end_of_intersection(i)==True):
+                self.time_to_exit.append(i.time_in_intersection)
+
+
 
     def most_congeseted(self):
         ## a function that returns which lane direciton is most congested. just implement but we decided we arent going to actually use it
@@ -266,6 +275,31 @@ class Intersection:
 
 
 
+    def at_end_of_intersection(self,curr):
+        if curr.current_position()==(0,8): #
+            return True
+        elif curr.current_position() == (14, 7): #
+            return True
+        elif curr.current_position() == (7, 14): #
+            return True
+        elif curr.current_position() == (14, 6): #
+            return True
+        elif curr.current_position() == (6, 0): #
+            return True
+        elif curr.current_position() == (8, 14): #
+            return True
+        else:
+            return False
+
+
+
+    def print_stdev(self):
+
+        print("time to exit arr:", self.time_to_exit[10:])
+        print("stdev:",np.std(self.time_to_exit[10:]))
+
+
+
 if __name__ == "__main__":
 
 
@@ -277,12 +311,16 @@ if __name__ == "__main__":
     for i in range(100):
         a.generate_traffic()
         a.print_intersection()
-        time.sleep(0.3)
+        time.sleep(0.5)
         a.take_step()
         a.count_collisions()
+    a.print_stdev()
     a.create_graph()
     t1.join()   #joins the traffic light thread to the main program.
-    a.create_graph()
+
+
+
+
 
     """
     a = Intersection()
